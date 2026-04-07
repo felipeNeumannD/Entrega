@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3001";
+const BASE_URL = "http://177.44.248.15/api";
 
 function headers() {
   return {
