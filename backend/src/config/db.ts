@@ -2,9 +2,9 @@ import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 dotenv.config();
 
-if (!process.env.DB_HOST || !process.env.DB_USER) {
-  throw new Error("Variáveis de ambiente não definidas");
-}
+// if (!process.env.DB_HOST || !process.env.DB_USER) {
+//   throw new Error("Variáveis de ambiente não definidas");
+// }
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || "localhost",
