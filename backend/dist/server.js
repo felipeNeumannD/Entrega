@@ -6,7 +6,7 @@ import receitaRoutes from "./routes/receitaRoutes.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
-app.use(cors({ origin: "http://localhost:5174" })); // ajuste para sua URL do front
+app.use(cors({ origin: "*" })); // ajuste para sua URL do front
 app.use(express.json());
 app.use("/auth", authRoutes);
 app.use("/receitas", receitaRoutes);
