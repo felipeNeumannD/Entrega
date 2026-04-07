@@ -27,6 +27,7 @@ export async function login(req: Request, res: Response) {
       usuario: { id: user.id, nome: user.nome, login: user.login },
     });
   } catch (err) {
-    res.status(500).json({ error: "Erro interno no servidor." });
+    console.log(err)
+    res.status(500).json({ error: err });
   }
 }
