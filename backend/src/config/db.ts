@@ -7,7 +7,7 @@ if (!process.env.DB_HOST || !process.env.DB_USER) {
 }
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || "177.44.248.76",
+  host: process.env.DB_HOST || "localhost",
   port: Number(process.env.DB_PORT) || 3306,
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
