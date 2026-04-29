@@ -50,6 +50,25 @@ export async function apiDeletar(id: number) {
   if (!res.ok) throw new Error("Erro ao excluir receita.");
 }
 
+export async function pdfgerar()
+{
+  const res = await fetch(`${BASE_URL}/receitas/pdf`, {
+   headers: headers(),
+  });
+
+  const blob = await res.blob();
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "documento.pdf";
+  a.click();
+
+  URL.revokeObjectURL(url);
+
+  if (!res.ok) throw new Error("Erro ao gerar PDF");
+}
+
 interface Receita {
   id: number;
   nome: string;

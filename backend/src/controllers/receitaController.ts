@@ -1,5 +1,7 @@
 import type { Request, Response } from 'express';
 import pool from "../config/db.js";
+import PDFDocument from "pdfkit";
+
 
 // GET /receitas
 export async function listar(req: Request, res: Response) {
@@ -81,4 +83,20 @@ export async function deletar(req: Request, res: Response) {
   } catch {
     res.status(500).json({ error: "Erro ao excluir receita." });
   }
+}
+
+
+export async function pdf(req: Request, res: Response) {
+  const doc = new PDFDocument();
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", "attachment; filename=documento.pdf");
+
+  doc.pipe(res);
+
+  doc.fontSize(20).text("Olá, este é um PDF simples!", { align: "center" });
+  doc.moveDown();
+  doc.fontSize(12).text(`Gerado em: ${new Date().toLocaleString("pt-BR")}`);
+
+  doc.end();
 }

@@ -1,7 +1,7 @@
 // Receitas.tsx
 import { useEffect, useState } from "react";
 import type { Usuario } from "../App";
-import { apiAtualizar, apiCriar, apiDeletar, apiListar } from "../services/api";
+import { apiAtualizar, apiCriar, apiDeletar, apiListar, pdfgerar } from "../services/api";
 
 interface Receita {
   id: number;
@@ -61,6 +61,11 @@ export default function Receitas({ usuario, onLogout }: Props) {
 
   // ── modal ──
   function openCreate() { setEditId(null); setForm(emptyForm()); setModalAberto(true); }
+
+  function generatePDF(){
+    pdfgerar()
+  }
+
   function openEdit(r: Receita) {
     setEditId(r.id);
     setForm({ nome: r.nome, descricao: r.descricao, data_registro: r.data_registro, custo: r.custo, tipo_receita: r.tipo_receita });
@@ -121,7 +126,11 @@ export default function Receitas({ usuario, onLogout }: Props) {
             <h1 style={s.pageTitle}>Receitas</h1>
             <p style={s.pageSub}>Gerencie suas receitas doces e salgadas</p>
           </div>
-          <button style={s.btnNew} onClick={openCreate}>＋ Nova Receita</button>
+          <div>
+            <button style={s.btnNew} onClick={generatePDF}>Gerar PDF</button>
+            <span> </span>
+            <button style={s.btnNew} onClick={openCreate}>＋ Nova Receita</button>
+          </div>
         </div>
 
         {/* STATS */}
