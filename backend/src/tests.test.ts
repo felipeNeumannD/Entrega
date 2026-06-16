@@ -6,8 +6,7 @@
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-
-import { jest, describe, it, expect, beforeEach } from "@jest/globals";
+import { jest, describe, it, expect } from "@jest/globals";
 
 function mockRes() {
   const res: any = {};
@@ -36,7 +35,6 @@ const pdfDocEndMock  = jest.fn();
 const pdfDocPipeMock = jest.fn();
 const pdfDocTextMock = jest.fn().mockReturnThis();
 const pdfDocMoveMock = jest.fn().mockReturnThis();
-const pdfDocFontMock = jest.fn().mockReturnThis();
 
 jest.mock("pdfkit", () =>
   jest.fn().mockImplementation(() => ({
