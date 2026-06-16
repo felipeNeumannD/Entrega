@@ -21,8 +21,8 @@ export default function Login({ onLogin }: Props) {
       const data = await apiLogin(form.login, form.senha);
       localStorage.setItem("token", data.token);
       onLogin(data.usuario);
-    } catch (err: any) {
-      setErro(err.message || "Erro ao realizar login.");
+    } catch (err) {
+      setErro(err instanceof Error ? err.message : "Erro ao realizar login.");
     }
   }
 

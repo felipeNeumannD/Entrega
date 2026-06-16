@@ -1,5 +1,5 @@
 // Receitas.tsx
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Usuario } from "../App";
 import { apiAtualizar, apiCriar, apiDeletar, apiListar, pdfgerar } from "../services/api";
 
@@ -35,11 +35,7 @@ export default function Receitas({ usuario, onLogout }: Props) {
   const [form, setForm]                 = useState<Omit<Receita, "id">>(emptyForm());
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
-  useEffect(() => {
-    carregarReceitas();
-  }, [filtro, busca]);
-
-  async function carregarReceitas() {
+  const carregarReceitas = useCallback(async () => {
     setLoading(true);
     try {
       const data = await apiListar(filtro, busca);
@@ -49,7 +45,11 @@ export default function Receitas({ usuario, onLogout }: Props) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [filtro, busca]);
+
+  useEffect(() => {
+    carregarReceitas();
+  }, [carregarReceitas]);
 
   // ── derivados ──
   const lista      = receitas; // filtro/busca já vêm da API
