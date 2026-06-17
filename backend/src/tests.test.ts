@@ -25,11 +25,8 @@ function mockReq(overrides: Record<string, any> = {}): any {
 
 let mockQueryImpl: any = jest.fn();
 
-// jest.fn() sem tipo genérico retorna Mock<unknown>, onde mockResolvedValue espera
-// Awaited<unknown> que o TS resolve como never. Os helpers abaixo contornam isso.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const mockResolve = (val: unknown) => (jest.fn() as jest.Mock<any>).mockResolvedValue(val);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockReject  = (err: unknown) => (jest.fn() as jest.Mock<any>).mockRejectedValue(err);
 
 const pdfDocEndMock  = jest.fn();
