@@ -8,8 +8,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/entrega-backend
-  FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/entrega-frontend
 
 jobs:
   # ── Qualidade: TypeScript ────────────────────────────────────────────────────
@@ -76,6 +74,12 @@ jobs:
       version: ${{ steps.version.outputs.value }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Definir nomes das imagens em lowercase
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "BACKEND_IMAGE=ghcr.io/${OWNER}/entrega-backend" >> $GITHUB_ENV
+          echo "FRONTEND_IMAGE=ghcr.io/${OWNER}/entrega-frontend" >> $GITHUB_ENV
 
       - name: Calcular versão
         id: version
