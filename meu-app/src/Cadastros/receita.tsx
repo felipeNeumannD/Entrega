@@ -124,7 +124,7 @@ export default function Receitas({ usuario, onLogout }: Props) {
         <div style={s.pageHeader}>
           <div>
             <h1 style={s.pageTitle}>Receitas</h1>
-            <p style={s.pageSub}>Gerencie suas receitas doces e salgadas com o Felps</p>
+            <p style={s.pageSub}>Gerencie suas receitas doces e salgadas</p>
           </div>
           <div>
             <button style={s.btnNew} onClick={generatePDF}>Gerar PDF</button>
