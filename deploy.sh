@@ -77,6 +77,7 @@ env_logs() {
 
 env_update() {
   local env="${1:-homolog}"
+  local force="${2:-}"
 
   [[ "$env" == "homolog" || "$env" == "prod" ]] || error "Ambiente inválido. Use: homolog ou prod"
 
@@ -84,7 +85,7 @@ env_update() {
   git pull || error "Falha no git pull. Verifique conflitos."
   success "Código atualizado."
 
-  if [ "$env" = "prod" ]; then
+  if [ "$env" = "prod" ] && [ "$force" != "--yes" ]; then
     echo ""
     warn "╔══════════════════════════════════════════╗"
     warn "║  ATENÇÃO: você está prestes a atualizar  ║"
@@ -92,9 +93,9 @@ env_update() {
     warn "║  Confirme que homologação foi validada.  ║"
     warn "╚══════════════════════════════════════════╝"
     echo ""
-    warn "Digite 'produção' para confirmar o deploy:"
+    warn "Digite 'producao' para confirmar o deploy:"
     read -r confirm
-    [ "$confirm" = "produção" ] || { info "Deploy cancelado."; exit 0; }
+    [ "$confirm" = "producao" ] || { info "Deploy cancelado."; exit 0; }
   fi
 
   local compose_file="docker-compose.${env}.yml"
@@ -182,7 +183,7 @@ case "$COMMAND" in
     env_status
     ;;
   update)
-    env_update "$ENV"
+    env_update "$ENV" "${3:-}"
     ;;
   up-all)
     env_up homolog
