@@ -132,7 +132,10 @@ env_migrate() {
   local db_container
   if [ "$env" = "homolog" ]; then db_container="homolog_db"; else db_container="prod_db"; fi
 
-  source "$env_file"
+  local DB_USER DB_PASSWORD DB_NAME
+  DB_USER=$(grep    '^DB_USER='     "$env_file" | cut -d'=' -f2-)
+  DB_PASSWORD=$(grep '^DB_PASSWORD=' "$env_file" | cut -d'=' -f2-)
+  DB_NAME=$(grep    '^DB_NAME='     "$env_file" | cut -d'=' -f2-)
 
   info "Criando tabela de controle de migrations em ${env^^}..."
   docker exec "$db_container" mysql -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" -e "
