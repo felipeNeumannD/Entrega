@@ -13,6 +13,8 @@ export interface Usuario {
 function App() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
 
+  var logica = 'wwaaaa'
+
   if (!usuario) {
     return <Login onLogin={setUsuario} />;
   }
