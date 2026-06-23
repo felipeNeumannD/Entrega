@@ -26,7 +26,7 @@ env_up() {
   [ -f "$env_file" ]     || error "Arquivo $env_file não encontrado."
 
   info "Subindo ambiente: ${env^^}"
-  docker compose -f "$compose_file" --env-file "$env_file" up --build -d
+  docker compose -p "$env" -f "$compose_file" --env-file "$env_file" up --build -d
   success "Ambiente ${env^^} no ar!"
 
   if [ "$env" = "homolog" ]; then
@@ -46,7 +46,7 @@ env_down() {
   [ -f "$compose_file" ] || error "Arquivo $compose_file não encontrado."
 
   info "Derrubando ambiente: ${env^^}"
-  docker compose -f "$compose_file" --env-file "$env_file" down
+  docker compose -p "$env" -f "$compose_file" --env-file "$env_file" down
   success "Ambiente ${env^^} parado."
 }
 
@@ -60,8 +60,8 @@ env_reset() {
   [[ "$confirm" =~ ^[sS]$ ]] || { info "Operação cancelada."; return; }
 
   info "Resetando ambiente: ${env^^}"
-  docker compose -f "$compose_file" --env-file "$env_file" down -v
-  docker compose -f "$compose_file" --env-file "$env_file" up --build -d
+  docker compose -p "$env" -f "$compose_file" --env-file "$env_file" down -v
+  docker compose -p "$env" -f "$compose_file" --env-file "$env_file" up --build -d
   success "Ambiente ${env^^} resetado com banco limpo."
 }
 
@@ -72,7 +72,7 @@ env_logs() {
   local service="${2:-}"
 
   info "Logs do ambiente ${env^^} ${service:+(serviço: $service)}"
-  docker compose -f "$compose_file" --env-file "$env_file" logs -f $service
+  docker compose -p "$env" -f "$compose_file" --env-file "$env_file" logs -f $service
 }
 
 env_status() {
