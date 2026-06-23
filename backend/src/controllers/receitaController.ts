@@ -21,7 +21,7 @@ export async function listar(req: Request, res: Response) {
 
     sql += " ORDER BY data_registro DESC";
     const [rows] = await pool.query(sql, params);
-    res.json(rows);
+    res.json({ receitas: rows }); // Para quebrar res.json({ receitas: rows });
   } catch {
     res.status(500).json({ error: "Erro ao listar receitas." });
   }
