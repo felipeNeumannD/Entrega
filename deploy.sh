@@ -76,28 +76,33 @@ env_logs() {
 }
 
 env_update() {
-  local env="${1:-}"
+  local env="${1:-homolog}"
+
+  [[ "$env" == "homolog" || "$env" == "prod" ]] || error "Ambiente inválido. Use: homolog ou prod"
 
   info "Atualizando código (git pull)..."
   git pull || error "Falha no git pull. Verifique conflitos."
   success "Código atualizado."
 
-  if [ -n "$env" ]; then
-    [[ "$env" == "homolog" || "$env" == "prod" ]] || error "Ambiente inválido. Use: homolog ou prod"
-    local compose_file="docker-compose.${env}.yml"
-    local env_file=".env.${env}"
-    info "Reconstruindo e reiniciando: ${env^^}"
-    docker compose -p "$env" -f "$compose_file" --env-file "$env_file" up --build -d
-    success "Ambiente ${env^^} atualizado!"
-  else
-    info "Reconstruindo e reiniciando: HOMOLOGAÇÃO"
-    docker compose -p homolog -f docker-compose.homolog.yml --env-file .env.homolog up --build -d
-    success "Homologação atualizada!"
+  if [ "$env" = "prod" ]; then
     echo ""
-    info "Reconstruindo e reiniciando: PRODUÇÃO"
-    docker compose -p prod -f docker-compose.prod.yml --env-file .env.prod up --build -d
-    success "Produção atualizada!"
+    warn "╔══════════════════════════════════════════╗"
+    warn "║  ATENÇÃO: você está prestes a atualizar  ║"
+    warn "║  o ambiente de PRODUÇÃO.                 ║"
+    warn "║  Confirme que homologação foi validada.  ║"
+    warn "╚══════════════════════════════════════════╝"
+    echo ""
+    warn "Digite 'produção' para confirmar o deploy:"
+    read -r confirm
+    [ "$confirm" = "produção" ] || { info "Deploy cancelado."; exit 0; }
   fi
+
+  local compose_file="docker-compose.${env}.yml"
+  local env_file=".env.${env}"
+
+  info "Reconstruindo e reiniciando: ${env^^}"
+  docker compose -p "$env" -f "$compose_file" --env-file "$env_file" up --build -d
+  success "Ambiente ${env^^} atualizado!"
 
   echo ""
   env_status
@@ -129,7 +134,7 @@ usage() {
   echo -e "${CYAN}Uso:${NC} ./deploy.sh <comando> [ambiente] [opções]"
   echo ""
   echo -e "${CYAN}Comandos:${NC}"
-  echo "  update  [homolog|prod]     git pull + rebuild + restart (ambos se omitir)"
+  echo "  update  [homolog|prod]     git pull + rebuild (homolog padrão; prod pede confirmação)"
   echo "  up      <homolog|prod>     Sobe o ambiente (build + start)"
   echo "  down    <homolog|prod>     Para o ambiente"
   echo "  reset   <homolog|prod>     Para, apaga o banco e sobe do zero"
