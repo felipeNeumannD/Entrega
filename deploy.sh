@@ -75,6 +75,34 @@ env_logs() {
   docker compose -p "$env" -f "$compose_file" --env-file "$env_file" logs -f $service
 }
 
+env_update() {
+  local env="${1:-}"
+
+  info "Atualizando código (git pull)..."
+  git pull || error "Falha no git pull. Verifique conflitos."
+  success "Código atualizado."
+
+  if [ -n "$env" ]; then
+    [[ "$env" == "homolog" || "$env" == "prod" ]] || error "Ambiente inválido. Use: homolog ou prod"
+    local compose_file="docker-compose.${env}.yml"
+    local env_file=".env.${env}"
+    info "Reconstruindo e reiniciando: ${env^^}"
+    docker compose -p "$env" -f "$compose_file" --env-file "$env_file" up --build -d
+    success "Ambiente ${env^^} atualizado!"
+  else
+    info "Reconstruindo e reiniciando: HOMOLOGAÇÃO"
+    docker compose -p homolog -f docker-compose.homolog.yml --env-file .env.homolog up --build -d
+    success "Homologação atualizada!"
+    echo ""
+    info "Reconstruindo e reiniciando: PRODUÇÃO"
+    docker compose -p prod -f docker-compose.prod.yml --env-file .env.prod up --build -d
+    success "Produção atualizada!"
+  fi
+
+  echo ""
+  env_status
+}
+
 env_status() {
   echo ""
   echo -e "${BLUE}══════════════════════════════════════════${NC}"
@@ -101,6 +129,7 @@ usage() {
   echo -e "${CYAN}Uso:${NC} ./deploy.sh <comando> [ambiente] [opções]"
   echo ""
   echo -e "${CYAN}Comandos:${NC}"
+  echo "  update  [homolog|prod]     git pull + rebuild + restart (ambos se omitir)"
   echo "  up      <homolog|prod>     Sobe o ambiente (build + start)"
   echo "  down    <homolog|prod>     Para o ambiente"
   echo "  reset   <homolog|prod>     Para, apaga o banco e sobe do zero"
@@ -110,6 +139,9 @@ usage() {
   echo "  down-all                   Para todos os ambientes"
   echo ""
   echo -e "${CYAN}Exemplos:${NC}"
+  echo "  ./deploy.sh update              # atualiza os dois"
+  echo "  ./deploy.sh update homolog      # atualiza só homologação"
+  echo "  ./deploy.sh update prod         # atualiza só produção"
   echo "  ./deploy.sh up homolog"
   echo "  ./deploy.sh up prod"
   echo "  ./deploy.sh logs homolog backend"
@@ -143,6 +175,9 @@ case "$COMMAND" in
     ;;
   status)
     env_status
+    ;;
+  update)
+    env_update "$ENV"
     ;;
   up-all)
     env_up homolog
