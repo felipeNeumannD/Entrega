@@ -109,6 +109,67 @@ env_update() {
   env_status
 }
 
+env_migrate() {
+  local env=$1
+  local force="${2:-}"
+  local compose_file="docker-compose.${env}.yml"
+  local env_file=".env.${env}"
+
+  [ -f "$compose_file" ] || error "Arquivo $compose_file não encontrado."
+  [ -f "$env_file" ]     || error "Arquivo $env_file não encontrado."
+  [ -d "db/migrations" ] || error "Pasta db/migrations não encontrada."
+
+  if [ "$env" = "prod" ] && [ "$force" != "--yes" ]; then
+    echo ""
+    warn "╔══════════════════════════════════════════╗"
+    warn "║  ATENÇÃO: aplicar migrations em PRODUÇÃO ║"
+    warn "╚══════════════════════════════════════════╝"
+    warn "Digite 'producao' para confirmar:"
+    read -r confirm
+    [ "$confirm" = "producao" ] || { info "Cancelado."; return; }
+  fi
+
+  local db_container
+  if [ "$env" = "homolog" ]; then db_container="homolog_db"; else db_container="prod_db"; fi
+
+  source "$env_file"
+
+  info "Criando tabela de controle de migrations em ${env^^}..."
+  docker exec "$db_container" mysql -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" -e "
+    CREATE TABLE IF NOT EXISTS _migrations (
+      id         INT AUTO_INCREMENT PRIMARY KEY,
+      arquivo    VARCHAR(255) NOT NULL UNIQUE,
+      aplicado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );" 2>/dev/null
+
+  local aplicadas=0
+  local ignoradas=0
+
+  for arquivo in db/migrations/*.sql; do
+    local nome
+    nome=$(basename "$arquivo")
+
+    local ja_aplicada
+    ja_aplicada=$(docker exec "$db_container" mysql -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" -sNe \
+      "SELECT COUNT(*) FROM _migrations WHERE arquivo='${nome}';" 2>/dev/null)
+
+    if [ "$ja_aplicada" = "1" ]; then
+      echo "  [já aplicada] $nome"
+      ignoradas=$((ignoradas + 1))
+    else
+      info "  Aplicando: $nome"
+      docker exec -i "$db_container" mysql -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" < "$arquivo"
+      docker exec "$db_container" mysql -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" -e \
+        "INSERT INTO _migrations (arquivo) VALUES ('${nome}');" 2>/dev/null
+      success "  Aplicada:  $nome"
+      aplicadas=$((aplicadas + 1))
+    fi
+  done
+
+  echo ""
+  success "Migrations ${env^^}: ${aplicadas} aplicada(s), ${ignoradas} já existente(s)."
+}
+
 env_status() {
   echo ""
   echo -e "${BLUE}══════════════════════════════════════════${NC}"
@@ -136,6 +197,7 @@ usage() {
   echo ""
   echo -e "${CYAN}Comandos:${NC}"
   echo "  update  [homolog|prod]     git pull + rebuild (homolog padrão; prod pede confirmação)"
+  echo "  migrate <homolog|prod>     Aplica migrations pendentes (prod pede confirmação)"
   echo "  up      <homolog|prod>     Sobe o ambiente (build + start)"
   echo "  down    <homolog|prod>     Para o ambiente"
   echo "  reset   <homolog|prod>     Para, apaga o banco e sobe do zero"
@@ -184,6 +246,10 @@ case "$COMMAND" in
     ;;
   update)
     env_update "$ENV" "${3:-}"
+    ;;
+  migrate)
+    [[ "$ENV" == "homolog" || "$ENV" == "prod" ]] || { usage; error "Ambiente inválido. Use: homolog ou prod"; }
+    env_migrate "$ENV" "${3:-}"
     ;;
   up-all)
     env_up homolog
