@@ -132,34 +132,24 @@ jobs:
 
   # ── Homologação (develop e main) ─────────────────────────────────────────────
   deploy-homolog:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build-and-push
     if: github.event_name == 'push'
     environment: homologacao
     steps:
-      - name: Deploy Homologação via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd ${{ secrets.PROJECT_PATH }}
-            bash deploy.sh update homolog
+      - name: Deploy Homologação
+        run: |
+          cd ~/entrega
+          bash deploy.sh update homolog
 
   # ── Produção (somente main — aguarda aprovação manual no GitHub) ─────────────
   deploy-prod:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: deploy-homolog
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment: producao
     steps:
-      - name: Deploy Produção via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd ${{ secrets.PROJECT_PATH }}
-            bash deploy.sh update prod --yes
+      - name: Deploy Produção
+        run: |
+          cd ~/entrega
+          bash deploy.sh update prod --yes
