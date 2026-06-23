@@ -18,6 +18,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - homolog_net
 
   backend:
     build:
@@ -32,11 +34,14 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+      CORS_ORIGIN: http://localhost:8080
     ports:
       - "3001:3000"
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - homolog_net
 
   frontend:
     build:
@@ -48,10 +53,12 @@ services:
       - "8080:80"
     depends_on:
       - backend
+    networks:
+      - homolog_net
 
 volumes:
   homolog_db:
 
 networks:
-  default:
-    name: homolog_network
+  homolog_net:
+    name: homolog_net

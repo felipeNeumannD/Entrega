@@ -18,6 +18,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - prod_net
 
   backend:
     build:
@@ -32,11 +34,14 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+      CORS_ORIGIN: http://localhost
     ports:
       - "3000:3000"
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - prod_net
 
   frontend:
     build:
@@ -48,10 +53,12 @@ services:
       - "80:80"
     depends_on:
       - backend
+    networks:
+      - prod_net
 
 volumes:
   prod_db:
 
 networks:
-  default:
-    name: prod_network
+  prod_net:
+    name: prod_net

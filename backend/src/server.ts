@@ -4,30 +4,21 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
 import receitaRoutes from "./routes/receitaRoutes.js";
 import nodemailer from "nodemailer";
-import { execSync } from "child_process";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors({ origin: "*"})); // ajuste para sua URL do front
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || "http://localhost:8080",
+  credentials: true,
+}));
 app.use(express.json());
 
 app.use("/auth",     authRoutes);
 app.use("/receitas", receitaRoutes);
 
-function runTests(): void {
-  console.log("🧪 Rodando testes unitários...");
-  try {
-    const output = execSync("npx jest --forceExit --verbose 2>&1", { encoding: "utf-8" });
-    console.log(output);
-    console.log("✅ Todos os testes passaram!");
-  } catch (err: any) {
-    console.log(err.stdout ?? err.message);
-    console.warn("⚠️  Alguns testes falharam!");
-  }
-}
 
 async function sendStartupEmail() {
   const transporter = nodemailer.createTransport({
