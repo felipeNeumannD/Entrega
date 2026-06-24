@@ -103,8 +103,6 @@ export default function Receitas({ usuario, onLogout }: Props) {
     }
   }
 
-  var texto = 'Quebra'
-
   const formatDate = (d: string) => {
     const [y, m, di] = d.split("-");
     return `${di}/${m}/${y}`;
