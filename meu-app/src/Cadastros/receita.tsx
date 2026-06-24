@@ -103,6 +103,8 @@ export default function Receitas({ usuario, onLogout }: Props) {
     }
   }
 
+  var texto = 'Quebra'
+
   const formatDate = (d: string) => {
     const [y, m, di] = d.split("-");
     return `${di}/${m}/${y}`;
@@ -123,7 +125,7 @@ export default function Receitas({ usuario, onLogout }: Props) {
         {/* HEADER */}
         <div style={s.pageHeader}>
           <div>
-            <h1 style={s.pageTitle}>Receitas</h1>
+            <h1 style={s.pageTitle}>Receitas Top</h1>
             <p style={s.pageSub}>Gerencie suas receitas doces e salgadas</p>
           </div>
           <div>
